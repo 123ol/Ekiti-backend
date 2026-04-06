@@ -1,0 +1,67 @@
+import express from 'express'
+import cors from 'cors'
+import { connectDB } from './config/db.js'
+import { errorHandler } from './middlewares/error.middleware.js'
+import { seedSystemRoles } from './controllers/role.controller.js'
+import { warmRoleCache } from './utils/rolePermissionsCache.js'
+
+import authRoutes from './routes/auth.routes.js'
+import incidentRoutes from './routes/incident.routes.js'
+import userRoutes from './routes/user.routes.js'
+import roleRoutes from './routes/role.routes.js'
+import reportRoutes from './routes/report.routes.js'
+import alertRoutes from './routes/alert.routes.js'
+import agencyRoutes from './routes/agency.routes.js'
+
+const app = express()
+
+// Connect to MongoDB, then seed system roles and warm the permissions cache
+connectDB().then(async () => {
+  await seedSystemRoles()
+  await warmRoleCache()
+})
+
+// CORS — allow web dev server, Expo web, and any configured frontend URL
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:8081',
+  'http://localhost:3000',
+  process.env.FRONTEND_URL,
+].filter(Boolean)
+
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      // Allow requests with no origin (mobile apps, curl, Postman)
+      if (!origin || allowedOrigins.includes(origin)) return cb(null, true)
+      cb(new Error(`CORS: origin ${origin} not allowed`))
+    },
+    credentials: true,
+  })
+)
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+// Health check
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Ekiti State Emergency Response System API',
+    status: 'running',
+    version: '1.0.0',
+  })
+})
+
+// API Routes
+app.use('/api/auth', authRoutes)
+app.use('/api/incidents', incidentRoutes)
+app.use('/api/users', userRoutes)
+app.use('/api/roles', roleRoutes)
+app.use('/api/reports', reportRoutes)
+app.use('/api/alerts', alertRoutes)
+app.use('/api/agencies', agencyRoutes)
+
+// Global error handler — must be last
+app.use(errorHandler)
+
+export default app
