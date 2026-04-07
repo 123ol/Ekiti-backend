@@ -240,7 +240,7 @@ export const assignIncident = async (req, res) => {
 // PATCH /api/incidents/:id/status
 export const updateStatus = async (req, res) => {
   const { status } = req.body
-  const validStatuses = ['pending', 'in_progress', 'resolved']
+  const validStatuses = ['pending', 'in_progress', 'resolved', 'false_alarm']
 
   if (!status || !validStatuses.includes(status)) {
     return res.status(400).json({
@@ -260,7 +260,7 @@ export const updateStatus = async (req, res) => {
     incident.resolutionReport = req.body.resolutionReport.trim()
   }
 
-  const statusLabels = { pending: 'Pending', in_progress: 'In Progress', resolved: 'Resolved' }
+  const statusLabels = { pending: 'Pending', in_progress: 'In Progress', resolved: 'Resolved', false_alarm: 'False Alarm' }
   incident.timeline.push({
     action:    `Status changed from ${statusLabels[prevStatus]} to ${statusLabels[status]}`,
     status,
@@ -275,6 +275,17 @@ export const updateStatus = async (req, res) => {
       action:    'Incident resolved and closed',
       status:    'resolved',
       note:      incident.resolutionReport ? 'Resolution report submitted' : 'Case closed',
+      time:      new Date(),
+      timestamp: new Date(),
+      by:        req.user.name,
+    })
+  }
+
+  if (status === 'false_alarm') {
+    incident.timeline.push({
+      action:    'Incident marked as false alarm',
+      status:    'false_alarm',
+      note:      req.body.note?.trim() || 'Confirmed false alarm',
       time:      new Date(),
       timestamp: new Date(),
       by:        req.user.name,

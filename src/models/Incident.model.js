@@ -14,7 +14,7 @@ const MediaSchema = new mongoose.Schema(
 const TimelineSchema = new mongoose.Schema(
   {
     action:    { type: String, required: true },
-    status:    { type: String, enum: ['pending', 'in_progress', 'resolved', null], default: null },
+    status:    { type: String, enum: ['pending', 'in_progress', 'resolved', 'false_alarm', null], default: null },
     note:      { type: String, default: '' },
     timestamp: { type: Date, default: Date.now },
     time:      { type: Date, default: Date.now },
@@ -42,7 +42,7 @@ const IncidentSchema = new mongoose.Schema(
     // Classification
     status: {
       type: String,
-      enum: ['pending', 'in_progress', 'resolved'],
+      enum: ['pending', 'in_progress', 'resolved', 'false_alarm'],
       default: 'pending',
     },
     priority: {
