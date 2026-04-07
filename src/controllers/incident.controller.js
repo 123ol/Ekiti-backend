@@ -33,8 +33,12 @@ export const createIncident = async (req, res) => {
     }
   }
 
-  // Normalise priority: accept 'priority' or mobile app's 'severity'
-  const priority = body.priority || SEVERITY_TO_PRIORITY[body.severity] || 'medium'
+  // Public channels (web portal / mobile app) always get 'medium' priority;
+  // severity is determined by admin at assignment time, not by the public reporter.
+  const PUBLIC_CHANNELS = ['web', 'app']
+  const priority = PUBLIC_CHANNELS.includes(channel)
+    ? 'medium'
+    : (body.priority || SEVERITY_TO_PRIORITY[body.severity] || 'medium')
 
   // Build media array from multer uploads (if any)
   const media = []
@@ -195,7 +199,7 @@ export const getIncident = async (req, res) => {
 
 // PATCH /api/incidents/:id/assign
 export const assignIncident = async (req, res) => {
-  const { userId, agency } = req.body
+  const { userId, agency, priority } = req.body
 
   if (!userId) {
     return res.status(400).json({ message: 'userId is required' })
@@ -217,9 +221,12 @@ export const assignIncident = async (req, res) => {
   incident.assignedTo = assignee._id
   if (agency) incident.agency = agency
   if (incident.status === 'pending') incident.status = 'in_progress'
+  const validPriorities = ['low', 'medium', 'high', 'critical']
+  if (priority && validPriorities.includes(priority)) incident.priority = priority
 
   incident.timeline.push({
     action: `Assigned to ${assignee.name}`,
+    note: priority ? `Priority set to ${priority}` : undefined,
     time: new Date(),
     by: req.user.name,
   })
