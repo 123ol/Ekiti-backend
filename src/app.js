@@ -30,6 +30,7 @@ const allowedOrigins = [
   'http://localhost:8081',
   'http://localhost:3000',
   'https://ekitistateewers.vercel.app',
+  'https://ewersekitistate.netlify.app',
   process.env.FRONTEND_URL,
 ].filter(Boolean)
 
