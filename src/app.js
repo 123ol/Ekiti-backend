@@ -32,7 +32,7 @@ const allowedOrigins = [
   'https://ekitistateewers.vercel.app',
   'https://ewersekitistate.netlify.app',
   'https://ewers.ekitistate.gov.ng',
-  'https://ewers.sassysoles.com.ng'
+  'https://ewers.sassysoles.com.ng',
   process.env.FRONTEND_URL,
 ].filter(Boolean)
 
