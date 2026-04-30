@@ -26,13 +26,7 @@ connectDB().then(async () => {
 
 // CORS — allow web dev server, Expo web, and any configured frontend URL
 const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:8081',
-  'http://localhost:3000',
-  'https://ekitistateewers.vercel.app',
-  'https://ewersekitistate.netlify.app',
   'https://ewers.ekitistate.gov.ng',
-  'https://ewers.sassysoles.com.ng',
   process.env.FRONTEND_URL,
 ].filter(Boolean)
 
