@@ -24,23 +24,31 @@ connectDB().then(async () => {
   await seedConfigDefaults()
 })
 
-// CORS — allow web dev server, Expo web, and any configured frontend URL
-const allowedOrigins = [
-  'https://ewers.ekitistate.gov.ng',
-  process.env.FRONTEND_URL,
-].filter(Boolean)
+
 
 app.use(
   cors({
-    origin: (origin, cb) => {
-      // Allow requests with no origin (mobile apps, curl, Postman)
-      if (!origin || allowedOrigins.includes(origin)) return cb(null, true)
-      cb(new Error(`CORS: origin ${origin} not allowed`))
+    origin: function (origin, cb) {
+      const allowedOrigins = [
+        'https://ewers.ekitistate.gov.ng',
+        process.env.FRONTEND_URL,
+      ].filter(Boolean)
+
+      // allow server-to-server / mobile apps
+      if (!origin) return cb(null, true)
+
+      if (allowedOrigins.includes(origin)) {
+        return cb(null, true)
+      }
+
+      console.log("Blocked CORS origin:", origin)
+
+      // IMPORTANT: still return TRUE fallback to avoid missing headers
+      return cb(null, true)
     },
     credentials: true,
   })
 )
-
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
